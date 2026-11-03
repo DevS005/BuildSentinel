@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BuildSentinel | SERBot Autonomous Site Safety & Structural AI</title>
+  <meta name="description" content="Sensor-based robotic AI vision system for construction site safety, PPE compliance, obstacle avoidance, geofenced danger zones, structural monitoring, and environmental hazard perception.">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="navbar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>SERBot BuildSentinel</h1>
+      </div>
+      <span class="brand-badge">AI MULTI-HAZARD v1.0</span>
+    </div>
+
+    <div class="nav-controls">
+      <div class="system-status">
+        <span class="status-dot"></span>
+        <span id="engine-status-text">Engine Online (5 Models Loaded)</span>
+      </div>
+      <button id="btn-export-json" class="btn-outline" style="width: auto;">
+        Export Safety Audit
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Dashboard Container -->
+  <main class="dashboard-container">
+    
+    <!-- Left Section: Robotic Vision HUD & Controls -->
+    <section class="viewport-card">
+      <div class="viewport-header">
+        <div class="mode-pills">
+          <button id="mode-stream" class="mode-btn active">Live Stream & HUD</button>
+          <button id="mode-inspect" class="mode-btn">Image Inspection</button>
+        </div>
+        <div id="processing-meta" style="font-size: 12px; font-family: var(--font-mono); color: var(--text-dim);">
+          LATENCY: <span id="meta-latency" style="color: var(--accent-cyan);">-- ms</span> | FPS: <span id="meta-fps" style="color: var(--accent-cyan);">--</span>
+        </div>
+      </div>
+
+      <!-- Viewport Display Canvas -->
+      <div class="viewport-screen" id="viewport-container">
+        <!-- Live Stream Stream Element -->
+        <img id="stream-view" src="/api/video_feed" alt="SERBot Robotic Vision Feed">
+        
+        <!-- Static Inspection Element -->
+        <img id="inspect-view" src="" alt="Analyzed Frame" style="display: none;">
+
+        <!-- Drag & Drop Upload Overlay (Visible in inspect mode) -->
+        <div id="upload-overlay" class="upload-overlay" style="display: none;">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="1.8">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+          </svg>
+          <p style="font-weight: 600; font-size: 14px;">Drop Site Inspection Image Here</p>
+          <p style="font-size: 12px; color: var(--text-dim);">or click to browse from device</p>
+          <input type="file" id="file-input" accept="image/*" style="display: none;">
+        </div>
+
+        <div id="live-tag" class="live-indicator">LIVE FEED</div>
+      </div>
+
+      <!-- Demo Sample Imagery Quick Selector -->
+      <div>
+        <div style="font-size: 11px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; margin-bottom: 6px;">
+          Quick Test Scenarios (Instant Site Imagery)
+        </div>
+        <div class="sample-bar" id="sample-bar">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Real-time Sensor Fusion Telemetry Ribbon -->
+      <div class="telemetry-ribbon">
+        <div class="gauge-box">
+          <span class="gauge-label">MQ-2 Gas / Smoke</span>
+          <span class="gauge-value" id="telem-gas">35.0 <small style="font-size: 11px; color: var(--text-dim);">ppm</small></span>
+        </div>
+        <div class="gauge-box">
+          <span class="gauge-label">Ambient Temp</span>
+          <span class="gauge-value" id="telem-temp">28.4 <small style="font-size: 11px; color: var(--text-dim);">°C</small></span>
+        </div>
+        <div class="gauge-box">
+          <span class="gauge-label">Obstacle Range</span>
+          <span class="gauge-value" id="telem-dist">250.0 <small style="font-size: 11px; color: var(--text-dim);">cm</small></span>
+        </div>
+        <div class="gauge-box">
+          <span class="gauge-label">IMU Vibration</span>
+          <span class="gauge-value" id="telem-vib">0.08 <small style="font-size: 11px; color: var(--text-dim);">g</small></span>
+        </div>
+        <div class="gauge-box">
+          <span class="gauge-label">SERBot Battery</span>
+          <span class="gauge-value" id="telem-bat" style="color: var(--accent-green);">94%</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Sidebar: Safety & Structural Intelligence -->
+    <aside class="sidebar">
+
+      <!-- Overall Safety Score & Status Card -->
+      <div class="card">
+        <div class="score-banner" id="score-banner">
+          <div>
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8;">Site Safety Index</div>
+            <div class="score-status" id="overall-status">OPTIMAL_SAFE</div>
+          </div>
+          <div class="score-num" id="overall-score">100</div>
+        </div>
+
+        <div style="margin-top: 14px;">
+          <div class="metric-row">
+            <span>SERBot Nav Directive</span>
+            <span class="badge safe" id="nav-command">PROCEED_SAFE</span>
+          </div>
+          <div class="metric-row">
+            <span>Navigation Advisory</span>
+            <span id="nav-status" style="font-size: 12px; color: var(--text-muted); text-align: right; max-width: 240px;">Path clear</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PPE & Safety Gear Compliance Card -->
+      <div class="card">
+        <div class="card-title">
+          <span>Worker PPE & Safety Gear Gaps</span>
+          <span class="badge safe" id="ppe-compliance-badge">100% COMPLIANT</span>
+        </div>
+        <div class="metric-row">
+          <span>Workers on Site</span>
+          <span id="workers-count" style="font-family: var(--font-mono); font-weight: 700;">0</span>
+        </div>
+        <div class="metric-row">
+          <span>Missing Safety Gear Alerts</span>
+          <span id="ppe-violations-count" class="badge safe">0</span>
+        </div>
+        <div id="worker-reports-list" style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px;">
+          <!-- Worker compliance rows rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Structural Monitoring Card -->
+      <div class="card">
+        <div class="card-title">
+          <span>Structural Health & Shifts</span>
+          <span class="badge safe" id="structural-badge">NORMAL</span>
+        </div>
+        <div class="metric-row">
+          <span>Surface Cracks Detected</span>
+          <span id="cracks-count" style="font-family: var(--font-mono); font-weight: 700;">0</span>
+        </div>
+        <div class="metric-row">
+          <span>Feature Displacement</span>
+          <span id="structural-displacement" style="font-family: var(--font-mono);">0.0 px</span>
+        </div>
+        <div class="metric-row">
+          <span>Shift Vector (dx, dy)</span>
+          <span id="structural-vector" style="font-family: var(--font-mono); color: var(--accent-cyan);">[0.0, 0.0]</span>
+        </div>
+      </div>
+
+      <!-- Hazards & Geofence Breaches Card -->
+      <div class="card">
+        <div class="card-title">
+          <span>Environmental & Spatial Hazards</span>
+          <span class="badge safe" id="hazards-badge">CLEAR</span>
+        </div>
+        <div class="metric-row">
+          <span>Fire & Smoke Threats</span>
+          <span id="fire-count" class="badge safe">None</span>
+        </div>
+        <div class="metric-row">
+          <span>Liquid Spills / Wet Ground</span>
+          <span id="spills-count" class="badge safe">None</span>
+        </div>
+        <div class="metric-row">
+          <span>Geofenced Danger Zone Breaches</span>
+          <span id="zone-breaches-count" class="badge safe">0</span>
+        </div>
+      </div>
+
+      <!-- Real-time Active Alerts Feed -->
+      <div class="card" style="flex: 1;">
+        <div class="card-title">
+          <span>Live Hazard Alerts</span>
+          <span id="alerts-total-badge" class="badge cyan">0 Alerts</span>
+        </div>
+        <div class="alerts-feed" id="alerts-feed">
+          <div style="font-size: 12px; color: var(--text-dim); text-align: center; padding: 20px 0;">
+            No active hazards or safety breaches detected.
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </main>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
